@@ -52,3 +52,8 @@ The existing Google Doc was updated in place and read back. Its security/test wo
 Runtime at this update: server and HTTPS tunnel running for Vince's immediate test. OAuth registrations and grants are bounded in process memory, so restarting requires re-adding the connector; changing the temporary hostname also requires updating the issuer. Local .env and .local/oauth-login-code.txt hold the private owner password, excluded from Git. Human Claude Web connection and actual Claude tool use remain pending. Stop the tunnel after testing.
 
 Sources: [Claude authentication](https://claude.com/docs/connectors/building/authentication), [testing through a tunnel](https://claude.com/docs/connectors/building/testing).
+### Browser approval Origin correction
+
+The first human Claude Web attempt reached the owner form but returned Invalid approval origin. The consent document used Referrer-Policy: no-referrer, which causes browsers to send Origin: null on HTML form POST navigation (MDN Referrer-Policy reference). Changed only the consent GET document to same-origin; OAuth callback redirects retain no-referrer. Origin and CSRF checks remain enforced. Added response-policy regression assertions to the existing consent flow tests. All 31 tests and the real HTTPS OAuth checker passed again after restarting the server. The programmatic checker supplies Origin explicitly, so it did not expose this browser-policy interaction in the original run. A fresh human Claude connection remains required.
+
+Source: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy

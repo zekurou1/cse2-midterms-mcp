@@ -39,6 +39,7 @@ def approval(client, client_id, **overrides):
     assert response.status_code == 302
     page = client.get(response.headers["location"])
     assert page.status_code == 200
+    assert page.headers["Referrer-Policy"] == "same-origin"
     fields = {name: re.search(f'name="{name}" value="([^"]+)"', page.text).group(1)
               for name in ("ticket", "csrf")}
     return fields, verifier
@@ -52,6 +53,7 @@ def grant(client):
     result = client.post("/consent", data={**fields, "password": PASSWORD, "decision": "allow"},
                          headers={"Origin": ISSUER})
     assert result.status_code == 302
+    assert result.headers["Referrer-Policy"] == "no-referrer"
     query = parse_qs(urlsplit(result.headers["location"]).query)
     assert query["state"] == ["original-state"]
     return dict(grant_type="authorization_code", code=query["code"][0], client_id=client_id,

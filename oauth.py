@@ -104,7 +104,10 @@ class OwnerOAuth:
 <p><label>Connection password <input name="password" type="password" required autocomplete="off"></label></p>
 <button name="decision" value="allow">Allow Claude</button>
 <button name="decision" value="deny" formnovalidate>Cancel</button></form></main></body></html>'''
-            response = HTMLResponse(page, headers=PAGE_HEADERS)
+            # no-referrer makes browsers send Origin: null on HTML form POSTs.
+            # Keep the real origin for same-origin approval, without leaking the
+            # ticket to the external OAuth callback. Redirects still use no-referrer.
+            response = HTMLResponse(page, headers={**PAGE_HEADERS, "Referrer-Policy": "same-origin"})
             response.set_cookie("cse2_csrf", csrf, max_age=300, httponly=True,
                                 secure=self.issuer.startswith("https:"), samesite="lax", path="/consent")
             return response
