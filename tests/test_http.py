@@ -83,3 +83,10 @@ def test_actual_mcp_client(endpoint):
                     response = await client.call_tool(name, arguments)
                     assert not response.is_error, (name, response)
     asyncio.run(run())
+
+
+@pytest.mark.parametrize("header,value,status", [("Host", "evil.example", 421), ("Origin", "https://evil.example", 403)])
+def test_host_and_origin_checks(endpoint, header, value, status):
+    with pytest.raises(HTTPError) as error:
+        urlopen(Request(endpoint[0], headers={"Authorization": "Bearer " + endpoint[1], header: value}), timeout=3)
+    assert error.value.code == status

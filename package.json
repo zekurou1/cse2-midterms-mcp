@@ -7,6 +7,8 @@
     "start": "pm2 start ecosystem.config.cjs --only cse2-mcp",
     "stop": "pm2 stop cse2-mcp",
     "status": "pm2 status",
+    "tunnel": "pm2 start ecosystem.config.cjs --only cse2-tunnel",
+    "stop:tunnel": "pm2 stop cse2-tunnel",
     "inspector": "mcp-inspector"
   },
   "devDependencies": {

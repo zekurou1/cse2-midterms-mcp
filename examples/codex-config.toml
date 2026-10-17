@@ -1,0 +1,12 @@
+# Add to a project-scoped Codex configuration only after reviewing it.
+# Put the secret in MCP_TOKEN in the environment used to launch Codex.
+[mcp_servers.midterms]
+url = "http://127.0.0.1:8765/mcp"
+bearer_token_env_var = "MCP_TOKEN"
+enabled_tools = ["list_files", "read_file", "write_file", "append_file", "search_files", "str_replace", "file_info"]
+required = true
+default_tools_approval_mode = "prompt"
+
+# For Planner, remove str_replace and file_info from enabled_tools.
+# delete_file is deliberately absent from both demo roles.
+# Keep human approval for overwrites/edits. Tool annotations are hints, not enforcement.
