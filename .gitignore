@@ -1,0 +1,9 @@
+.venv/
+.env
+.local/
+__pycache__/
+.pytest_cache/
+*.pyc
+node_modules/
+tasks/
+documentation-source.md
