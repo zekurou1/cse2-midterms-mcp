@@ -115,6 +115,8 @@ npm.cmd run stop:tunnel
 
 The tunnel configuration forwards the Host header as `127.0.0.1:8765`, preserving the SDK's local Host validation. Authentication still applies to every HTTP request. Browser requests with unexpected Origins are rejected. `PUBLIC_HOST` in `.env` is available if using another tunnel without that Host override. If changing the port, also change the tunnel target and Host override in `ecosystem.config.cjs`.
 
+Wait until the generated hostname resolves and `check_endpoint.py` passes before starting agents. A newly generated hostname failed to resolve through the local resolver during the restart test even though public DNS knew it; this is recorded as a tunnel limitation. Use localhost while developing and verify the current public URL before the live demonstration.
+
 ## Security and limits
 
 Every tool uses the same sandbox. Absolute/drive-relative/UNC paths, traversal, hidden paths, Windows device names and alternate data streams are rejected. Symlinks, junctions and hard-linked files are rejected. Complete-file writes use temporary files and replacement to reduce partial writes.

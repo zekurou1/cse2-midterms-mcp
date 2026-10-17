@@ -29,7 +29,12 @@ overrides = {
     "mcp_servers.midterms.enabled_tools": allowed,
     "mcp_servers.midterms.http_headers": {"X-Demo-Session": args.role},
     "mcp_servers.midterms.required": True,
+    # Vince authorized this isolated synthetic fixture. Only these two file-changing
+    # tools need explicit noninteractive policy; deletion is absent from both roles.
+    "mcp_servers.midterms.tools.write_file.approval_mode": "approve",
 }
+if args.role == "writer":
+    overrides["mcp_servers.midterms.tools.str_replace.approval_mode"] = "approve"
 for key, value in overrides.items():
     # JSON strings/arrays/bools also parse as TOML values; inline tables use TOML syntax.
     encoded = '{ "X-Demo-Session" = ' + json.dumps(args.role) + ' }' if isinstance(value, dict) else json.dumps(value)
