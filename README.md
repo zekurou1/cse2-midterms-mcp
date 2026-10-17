@@ -28,7 +28,7 @@ npm.cmd start
 
 If Python 3.12 is not installed, install it first or replace `py -3.12` with your Python 3.13/3.14 executable. The private repository requires access from its owner before cloning.
 
-The generated `.env` stays on your machine. Never commit or share it. PM2 runs the server in the background and restarts it after process failure. Logs are in `.local/`. This setup does not install a Windows startup service.
+The generated `.env` stays on your machine. Never commit or share it. PM2 runs the server in the background and restarts it after process failure. On Windows it uses `pythonw.exe` and hidden process windows to avoid opening a terminal. Logs are in `.local/`. This setup does not install a Windows startup service.
 
 ```powershell
 npm.cmd run status
