@@ -4,6 +4,7 @@ import asyncio
 import json
 import os
 import secrets
+import shutil
 import socket
 import subprocess
 import sys
@@ -21,13 +22,16 @@ BASE = Path(__file__).resolve().parents[1]
 
 
 @pytest.fixture(scope="module")
-def endpoint():
+def endpoint(tmp_path_factory):
+    isolated = tmp_path_factory.mktemp("http-server")
+    for name in ["server.py", "tools.py", "config.py"]:
+        shutil.copy2(BASE / name, isolated / name)
     with socket.socket() as sock:
         sock.bind(("127.0.0.1", 0))
         port = sock.getsockname()[1]
     token = secrets.token_urlsafe(32)
     env = {**os.environ, "MCP_TOKEN": token, "MCP_PORT": str(port), "PUBLIC_HOST": ""}
-    process = subprocess.Popen([sys.executable, "server.py"], cwd=BASE, env=env,
+    process = subprocess.Popen([sys.executable, "server.py"], cwd=isolated, env=env,
                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     url = f"http://127.0.0.1:{port}/mcp"
     try:
@@ -58,7 +62,24 @@ def test_actual_mcp_client(endpoint):
         async with httpx2.AsyncClient(headers={"Authorization": "Bearer " + endpoint[1]}) as http:
             async with Client(streamable_http_client(endpoint[0], http_client=http)) as client:
                 tools = await client.list_tools()
-                assert any(t.name == "list_files" for t in tools.tools)
+                assert len(tools.tools) == 8
+                assert all(t.input_schema["additionalProperties"] is False for t in tools.tools)
                 result = await client.call_tool("list_files", {"path": ".", "limit": 5})
                 assert not result.is_error
+                for arguments in [{"limit": "5"}, {"unexpected": True}, {"limit": 0}, {"path": "../secret.txt"}]:
+                    bad = await client.call_tool("list_files", arguments)
+                    assert bad.is_error
+                assert not (await client.call_tool("list_files", {})).is_error
+                calls = [
+                    ("write_file", {"path": "sample.md", "content": "first\nsecond\n"}),
+                    ("read_file", {"path": "sample.md", "max_lines": 1}),
+                    ("str_replace", {"path": "sample.md", "old_str": "second", "new_str": "updated"}),
+                    ("append_file", {"path": "sample.md", "content": "last\n"}),
+                    ("search_files", {"query": "updated"}),
+                    ("file_info", {"path": "sample.md"}),
+                    ("delete_file", {"path": "sample.md", "confirm": True}),
+                ]
+                for name, arguments in calls:
+                    response = await client.call_tool(name, arguments)
+                    assert not response.is_error, (name, response)
     asyncio.run(run())

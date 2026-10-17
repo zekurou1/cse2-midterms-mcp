@@ -1,0 +1,16 @@
+{
+  "name": "cse2-midterms-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Development tools for the Python MCP file-server assignment",
+  "scripts": {
+    "start": "pm2 start ecosystem.config.cjs --only cse2-mcp",
+    "stop": "pm2 stop cse2-mcp",
+    "status": "pm2 status",
+    "inspector": "mcp-inspector"
+  },
+  "devDependencies": {
+    "pm2": "7.0.4",
+    "@modelcontextprotocol/inspector": "2.11.0"
+  }
+}
