@@ -1,0 +1,23 @@
+{
+  "planner": {
+    "thread_id": "01a147fd-0995-73d1-8d3e-e712fe59c6e9",
+    "calls": 10,
+    "errors": 0,
+    "tools": [
+      "append_file",
+      "read_file"
+    ]
+  },
+  "writer": {
+    "thread_id": "01a147fe-56fa-77f1-bf17-c1695adfcd59",
+    "calls": 19,
+    "errors": 0,
+    "tools": [
+      "append_file",
+      "list_files",
+      "read_file",
+      "str_replace",
+      "write_file"
+    ]
+  }
+}

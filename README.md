@@ -131,6 +131,6 @@ The two submission outputs are this repository and the linked documentation repo
 
 Suggested timing: purpose/design (45 seconds), tools/security (60 seconds), Planner/Writer handoff (150 seconds), evidence/tradeoffs (45 seconds). Explain that the project demonstrates shared file context across sessions; the AI reasoning stays in Codex.
 
-The documentation link is recorded in `evidence/deliverables.json` when created.
+Documentation: [CSE2 Midterms MCP File Server Documentation](https://docs.google.com/document/d/1WttPP1LkViTinown0QSDgeAHH-k4NGNCwqEKVfWx7eA/edit). Both submission links are also recorded in `evidence/deliverables.json`. Access is private until the owner shares it with the evaluator.
 
 References: [Python SDK](https://py.sdk.modelcontextprotocol.io/), [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector), [Codex MCP configuration](https://developers.openai.com/codex/mcp), [Cloudflare Quick Tunnels](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/), [PM2 process management](https://pm2.keymetrics.io/docs/usage/process-management/). The supplied lecture PDF's slides 16-20 define the project/rubric; the PDF itself is not redistributed here.

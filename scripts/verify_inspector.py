@@ -21,6 +21,7 @@ cases = [
     ("search_files", {"query": "updated"}),
     ("file_info", {"path": target}),
     ("delete_file", {"path": target, "confirm": True}),
+    ("read_file", {"path": "../outside.txt"}),
 ]
 records = []
 for name, arguments in cases:
@@ -28,11 +29,12 @@ for name, arguments in cases:
                "--method", "tools/call", "--tool-name", name, "--tool-args-json", json.dumps(arguments),
                "--format", "json", "--header", "Authorization: Bearer " + token, "X-Demo-Session: inspector"]
     result = subprocess.run(command, capture_output=True, text=True, timeout=40)
-    if result.returncode:
+    expected_error = arguments.get("path") == "../outside.txt"
+    if result.returncode and not expected_error:
         raise RuntimeError(f"Inspector failed for {name}: " + result.stderr.replace(token, "[REDACTED]"))
     payload = json.loads(result.stdout)
-    assert not payload.get("result", payload).get("isError", False), payload
+    assert bool(payload.get("result", payload).get("isError", False)) == expected_error, payload
     records.append({"tool": name, "arguments": arguments, "inspector_output": payload})
 out = BASE / "evidence/inspector-checks.json"
 out.write_text(json.dumps(records, indent=2), encoding="utf-8")
-print(f"Inspector successfully exercised {len(records)} tools; evidence saved.")
+print("Inspector exercised eight tools and a rejected path-escape case; evidence saved.")

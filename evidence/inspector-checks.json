@@ -1,0 +1,160 @@
+[
+  {
+    "tool": "list_files",
+    "arguments": {
+      "path": "."
+    },
+    "inspector_output": {
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"entries\": [\n    {\n      \"path\": \"CHECKPOINTS.md\",\n      \"type\": \"file\"\n    },\n    {\n      \"path\": \"DECISIONS.md\",\n      \"type\": \"file\"\n    },\n    {\n      \"path\": \"notes\",\n      \"type\": \"directory\"\n    },\n    {\n      \"path\": \"PLAN_LOG.md\",\n      \"type\": \"file\"\n    },\n    {\n      \"path\": \"PROJECT_STATE.md\",\n      \"type\": \"file\"\n    },\n    {\n      \"path\": \"STUDY_GUIDE.md\",\n      \"type\": \"file\"\n    }\n  ],\n  \"truncated\": false\n}"
+          }
+        ],
+        "isError": false
+      }
+    }
+  },
+  {
+    "tool": "write_file",
+    "arguments": {
+      "path": "inspector-75fab5a8.txt",
+      "content": "first\nsecond\n"
+    },
+    "inspector_output": {
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"path\": \"inspector-75fab5a8.txt\",\n  \"bytes\": 13\n}"
+          }
+        ],
+        "isError": false
+      }
+    }
+  },
+  {
+    "tool": "read_file",
+    "arguments": {
+      "path": "inspector-75fab5a8.txt"
+    },
+    "inspector_output": {
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"path\": \"inspector-75fab5a8.txt\",\n  \"text\": \"1: first\\n2: second\",\n  \"total_lines\": 2,\n  \"next_line\": null\n}"
+          }
+        ],
+        "isError": false
+      }
+    }
+  },
+  {
+    "tool": "str_replace",
+    "arguments": {
+      "path": "inspector-75fab5a8.txt",
+      "old_str": "second",
+      "new_str": "updated"
+    },
+    "inspector_output": {
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"path\": \"inspector-75fab5a8.txt\",\n  \"bytes\": 14\n}"
+          }
+        ],
+        "isError": false
+      }
+    }
+  },
+  {
+    "tool": "append_file",
+    "arguments": {
+      "path": "inspector-75fab5a8.txt",
+      "content": "last\n"
+    },
+    "inspector_output": {
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"path\": \"inspector-75fab5a8.txt\",\n  \"bytes\": 19\n}"
+          }
+        ],
+        "isError": false
+      }
+    }
+  },
+  {
+    "tool": "search_files",
+    "arguments": {
+      "query": "updated"
+    },
+    "inspector_output": {
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"matches\": [\n    {\n      \"path\": \"CHECKPOINTS.md\",\n      \"line\": 13,\n      \"text\": \"questions, each with an answer. Initial PROJECT_STATE.md Status and Next action updated using str_replace.\"\n    },\n    {\n      \"path\": \"inspector-75fab5a8.txt\",\n      \"line\": 2,\n      \"text\": \"updated\"\n    }\n  ],\n  \"scanned\": 8,\n  \"truncated\": false\n}"
+          }
+        ],
+        "isError": false
+      }
+    }
+  },
+  {
+    "tool": "file_info",
+    "arguments": {
+      "path": "inspector-75fab5a8.txt"
+    },
+    "inspector_output": {
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"path\": \"inspector-75fab5a8.txt\",\n  \"bytes\": 19,\n  \"modified_utc\": \"2026-10-17T03:54:46.920209+00:00\"\n}"
+          }
+        ],
+        "isError": false
+      }
+    }
+  },
+  {
+    "tool": "delete_file",
+    "arguments": {
+      "path": "inspector-75fab5a8.txt",
+      "confirm": true
+    },
+    "inspector_output": {
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"path\": \"inspector-75fab5a8.txt\",\n  \"deleted\": true\n}"
+          }
+        ],
+        "isError": false
+      }
+    }
+  },
+  {
+    "tool": "read_file",
+    "arguments": {
+      "path": "../outside.txt"
+    },
+    "inspector_output": {
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Error executing tool read_file: Traversal and hidden paths are forbidden."
+          }
+        ],
+        "isError": true
+      }
+    }
+  }
+]

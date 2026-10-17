@@ -1,0 +1,9 @@
+{
+  "checked_utc": "2026-10-17T03:55:21.652518+00:00",
+  "source_commit": "81d643b758ac7cfe9cd9eb41330456f8fd13d828",
+  "method": "git clone --no-local into ignored scratch, fresh venv, pip install -r requirements.txt, npm ci, pytest",
+  "python": "3.12.14",
+  "tests_passed": 24,
+  "tests_skipped": 0,
+  "npm_install": "196 packages; optional inspector postinstall skipped by npm policy; published CLI works"
+}

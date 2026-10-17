@@ -1,0 +1,18 @@
+{
+  "checked_utc": "2026-10-17T03:46:24.780409+00:00",
+  "url": "https://like-bowl-quizzes-treat.trycloudflare.com/mcp",
+  "missing_token_status": 401,
+  "wrong_token_status": 401,
+  "tools": [
+    "list_files",
+    "read_file",
+    "write_file",
+    "str_replace",
+    "delete_file",
+    "search_files",
+    "append_file",
+    "file_info"
+  ],
+  "strict_schemas": true,
+  "authenticated_list_ok": true
+}
