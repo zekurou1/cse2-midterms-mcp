@@ -24,13 +24,13 @@ BASE = Path(__file__).resolve().parents[1]
 @pytest.fixture(scope="module")
 def endpoint(tmp_path_factory):
     isolated = tmp_path_factory.mktemp("http-server")
-    for name in ["server.py", "tools.py", "config.py"]:
+    for name in ["server.py", "tools.py", "config.py", "oauth.py"]:
         shutil.copy2(BASE / name, isolated / name)
     with socket.socket() as sock:
         sock.bind(("127.0.0.1", 0))
         port = sock.getsockname()[1]
     token = secrets.token_urlsafe(32)
-    env = {**os.environ, "MCP_TOKEN": token, "MCP_PORT": str(port), "PUBLIC_HOST": ""}
+    env = {**os.environ, "MCP_TOKEN": token, "MCP_PORT": str(port), "PUBLIC_HOST": "", "OAUTH_ISSUER_URL": ""}
     process = subprocess.Popen([sys.executable, "server.py"], cwd=isolated, env=env,
                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     url = f"http://127.0.0.1:{port}/mcp"

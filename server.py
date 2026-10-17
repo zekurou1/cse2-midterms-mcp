@@ -14,7 +14,8 @@ from jsonschema import validate, ValidationError
 from pydantic import Field
 from starlette.responses import JSONResponse
 
-from config import AUDIT_LOG, WORKSPACE, settings
+from config import AUDIT_LOG, WORKSPACE, oauth_settings, settings
+from oauth import OwnerOAuth
 from tools import Files
 from mcp.server.mcpserver.exceptions import ToolError
 
@@ -28,6 +29,9 @@ WRITE = ToolAnnotations(read_only_hint=False, destructive_hint=True, open_world_
 
 def create_app():
     token, _, public_host = settings()
+    oauth_config = oauth_settings()
+    oauth = OwnerOAuth(*oauth_config) if oauth_config else None
+    oauth_app = oauth.app() if oauth else None
     files = Files(WORKSPACE)
 
     async def observe(ctx, call_next):
@@ -57,6 +61,8 @@ def create_app():
                       "request_id": str(ctx.request_id), "tool": name, "arguments": args,
                       "result": result.model_dump(mode="json", by_alias=True) if hasattr(result, "model_dump") else result}
             line = json.dumps(record, ensure_ascii=True).replace(token, "[REDACTED]")
+            if oauth:
+                line = line.replace(oauth.password, "[REDACTED]")
             AUDIT_LOG.parent.mkdir(exist_ok=True)
             with AUDIT_LOG.open("a", encoding="utf-8") as stream:
                 stream.write(line + "\n")
@@ -124,19 +130,28 @@ def create_app():
         max_request_body_size=1024 * 1024,
         transport_security=TransportSecuritySettings(allowed_hosts=hosts, allowed_origins=origins))
 
-    # A shared classroom secret, not an OAuth identity/authorization service.
+    # Keep the original local-client secret; optionally accept owner-approved OAuth grants.
     class BearerAuth:
         def __init__(self, app):
             self.app = app
 
         async def __call__(self, scope, receive, send):
             if scope["type"] == "http":
+                if oauth_app and scope["path"] != "/mcp":
+                    return await oauth_app(scope, receive, send)
                 headers = dict(scope["headers"])
                 supplied = headers.get(b"authorization", b"")
                 expected = ("Bearer " + token).encode()
-                if not secrets.compare_digest(supplied, expected):
+                authorized = secrets.compare_digest(supplied, expected)
+                if not authorized and oauth and supplied.startswith(b"Bearer "):
+                    grant = await oauth.load_access_token(supplied[7:].decode("ascii", errors="ignore"))
+                    authorized = bool(grant and grant.resource == oauth.resource and "files" in grant.scopes)
+                if not authorized:
+                    challenge = "Bearer"
+                    if oauth:
+                        challenge += f' resource_metadata="{oauth.issuer}/.well-known/oauth-protected-resource/mcp", scope="files"'
                     response = JSONResponse({"error": "Valid bearer token required."}, status_code=401,
-                                            headers={"WWW-Authenticate": "Bearer"})
+                                            headers={"WWW-Authenticate": challenge})
                     return await response(scope, receive, send)
                 label = headers.get(b"x-demo-session", b"unlabeled").decode("ascii", errors="ignore")[:64]
                 marker = SESSION.set(label)

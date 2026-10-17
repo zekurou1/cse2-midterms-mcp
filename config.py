@@ -1,6 +1,7 @@
 """Small environment configuration. The exposed folder is always workspace/."""
 
 import os
+from urllib.parse import urlsplit
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -25,3 +26,18 @@ def settings():
     if not 1024 <= port <= 65535:
         raise ValueError("MCP_PORT must be between 1024 and 65535.")
     return token, port, host
+
+
+def oauth_settings():
+    """Disabled unless a fixed, public issuer origin and owner password are configured."""
+    issuer = os.environ.get("OAUTH_ISSUER_URL", "").strip().rstrip("/")
+    password = os.environ.get("OAUTH_PASSWORD", "")
+    if not issuer:
+        return None
+    parsed = urlsplit(issuer)
+    if (parsed.scheme != "https" or not parsed.hostname or parsed.path or parsed.query
+            or parsed.fragment or parsed.username or parsed.password):
+        raise ValueError("OAUTH_ISSUER_URL must be the HTTPS tunnel origin without /mcp.")
+    if len(password) < 32:
+        raise ValueError("Set a separate OAUTH_PASSWORD of at least 32 characters.")
+    return issuer, password

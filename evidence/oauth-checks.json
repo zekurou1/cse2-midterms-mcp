@@ -1,0 +1,15 @@
+{
+  "checked_utc": "2026-10-17T08:07:02.226150+00:00",
+  "https": true,
+  "discovery": true,
+  "dcr": true,
+  "owner_consent": true,
+  "pkce_exchange": true,
+  "code_replay_rejected": true,
+  "mcp_tools": 8,
+  "oauth_list_files_ok": true,
+  "refresh_rotation": true,
+  "refresh_replay_rejected": true,
+  "revocation": true,
+  "claude_web_ui_test": "Pending human connection; this check uses the official Python MCP client."
+}

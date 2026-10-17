@@ -53,7 +53,7 @@ Stop only this project with `npm.cmd stop`; do not use `pm2 kill` or `pm2 stop a
 
 Paths are relative to `workspace/`. Supported extensions: `.md`, `.txt`, `.json`, `.csv`. Maximum file size: 256 KiB. Parent directories for new files are created inside the sandbox. Invalid inputs and file errors return useful MCP errors rather than raw stack traces.
 
-`server.py` registers tools and handles HTTP authentication, schema enforcement and audit logging. `tools.py` contains the shared path checks and file operations. `config.py` contains the limits and environment settings.
+`server.py` registers tools and handles HTTP authentication, schema enforcement and audit logging. `tools.py` contains the shared path checks and file operations. `config.py` contains the limits and environment settings. `oauth.py` adds optional owner-approved OAuth for Claude Web using the MCP SDK's protocol handlers.
 
 ## Connect Codex
 
@@ -113,15 +113,42 @@ Find the current `https://....trycloudflare.com` URL in that log and append `/mc
 npm.cmd run stop:tunnel
 ```
 
-The tunnel configuration forwards the Host header as `127.0.0.1:8765`, preserving the SDK's local Host validation. Authentication still applies to every HTTP request. Browser requests with unexpected Origins are rejected. `PUBLIC_HOST` in `.env` is available if using another tunnel without that Host override. If changing the port, also change the tunnel target and Host override in `ecosystem.config.cjs`.
+The tunnel configuration forwards the Host header as `127.0.0.1:8765`, preserving the SDK's local Host validation. Authentication applies to every MCP request; optional OAuth discovery and sign-in endpoints are public. Browser MCP requests with unexpected Origins are rejected. `PUBLIC_HOST` in `.env` is available if using another tunnel without that Host override. If changing the port, also change the tunnel target and Host override in `ecosystem.config.cjs`.
 
 Wait until the generated hostname resolves and `check_endpoint.py` passes before starting agents. A newly generated hostname failed to resolve through the local resolver during the restart test even though public DNS knew it; this is recorded as a tunnel limitation. Use localhost while developing and verify the current public URL before the live demonstration.
+
+## Connect Claude Web with OAuth
+
+Claude's static request-header credentials are a limited organization beta. For an account without that feature, use the optional single-owner OAuth flow. No Google account, paid identity provider or database is needed.
+
+With the server and current tunnel running:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/enable_claude.py https://YOUR-CURRENT-HOST.trycloudflare.com/mcp
+.\node_modules\.bin\pm2.cmd restart cse2-mcp
+.\.venv\Scripts\python.exe scripts/check_oauth.py
+```
+
+This sets `OAUTH_ISSUER_URL` and a separate random `OAUTH_PASSWORD` in ignored `.env`. The private password is also saved in ignored `.local/oauth-login-code.txt`. Never paste it into chat or commit it. Read it locally when the server's authorization page asks for it.
+
+1. In Claude, remove the failed connector if one already exists, then add the current HTTPS URL ending in `/mcp`.
+2. Select **Sign in now**, **Register automatically**, and **Streamable HTTP**. Do not choose No sign-in or enter the bearer secret as an OAuth client secret.
+3. On **Connect CSE2 File Server**, enter the local connection password and select **Allow Claude**. Approval grants access to all eight tools in the sandbox. The return address must be `claude.ai`.
+4. Confirm the connector shows Connected and eight tools. In a new chat, enable it under **+ > Connectors**. Ask: `Use CSE2 File Server to list the files in claude-test.`
+
+The SDK handles DCR, S256 PKCE, redirect validation and token exchange. Owner consent checks a separate password, CSRF cookie and Origin, with five failed attempts per minute. Only Claude Web's exact callback is registered. Codes last two minutes, access tokens one hour, and rotating refresh tokens one day. Discovery and sign-in routes are public; `/mcp` always requires the original bearer secret or an approved OAuth access token. Passwords and tokens are not accepted in URL query strings.
+
+Registrations and grants are held in bounded process memory to keep the classroom project small. Restarting the server invalidates OAuth sessions; remove and re-add the Claude connector to register again. The original static bearer connection continues working. When the tunnel URL changes, run `enable_claude.py` with the new URL, restart the server and re-add the connector. Stop the tunnel after testing.
+
+`tests/test_oauth.py` and `scripts/check_oauth.py` cover the auth flow; `evidence/oauth-checks.json` records a successful real HTTPS OAuth-authenticated MCP call using the Python client. This is not evidence that a human completed the Claude Web dialog.
+
+References: [Claude authentication requirements](https://claude.com/docs/connectors/building/authentication), [Claude connector testing](https://claude.com/docs/connectors/building/testing).
 
 ## Security and limits
 
 Every tool uses the same sandbox. Absolute/drive-relative/UNC paths, traversal, hidden paths, Windows device names and alternate data streams are rejected. Symlinks, junctions and hard-linked files are rejected. Complete-file writes use temporary files and replacement to reduce partial writes.
 
-The bearer secret protects this classroom endpoint. It is not a full OAuth service, and there is no per-user access system. Flags such as `confirm=true` and MCP annotations do not prove human approval: use the client's confirmation controls, and keep deletion disabled for normal agents. The automated fixture run creates/appends demo files under the user's project authorization; it does not prove that a human clicked an interactive approval dialog.
+The bearer secret protects the classroom endpoint for local clients. Optional OAuth grants provide Claude Web access after owner approval; there is no per-user access system. Flags such as `confirm=true` and MCP annotations do not prove approval of each file operation: use the client's confirmation controls, and keep deletion disabled for normal agents. The automated fixture run creates/appends demo files under the user's project authorization; it does not prove that a human clicked an interactive approval dialog.
 
 Use one writer at a time. The project does not protect against a hostile local user racing filesystem changes, provide version locking, rotate audit logs, or guarantee service after Windows reboot. Keep the PC awake for a live demonstration and stop the tunnel afterwards.
 

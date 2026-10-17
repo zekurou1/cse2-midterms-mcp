@@ -6,7 +6,7 @@ Date: 2026-10-17, Asia/Manila. Scope: CSE2 Midterms Part 1.
 
 | Check | Result | Evidence |
 | --- | --- | --- |
-| Focused Python tests | 24 passed, zero skipped | tests/; clean-checkout.json |
+| Original implementation Python tests | 24 passed, zero skipped; OAuth update below | tests/; clean-checkout.json |
 | Fresh checkout | New venv, requirements installation, npm ci and 24 passing tests | clean-checkout.json |
 | Tool discovery | Eight strict schemas; unknown arguments rejected | tool-schemas.json; HTTP tests |
 | MCP Inspector | All eight tools called successfully; traversal returned isError | inspector-checks.json |
@@ -40,3 +40,15 @@ The tunnel restart initially produced a DNS name that public DNS knew but the de
 ## Documentation verification
 
 The Google Doc was imported from a title-sanitized DOCX and read back through the connector. All eight tool names, 24-test result, 29-call result and repository link survived. Six native tables were confirmed. Google conversion initially equalized column widths; scoped native formatting restored the intended widths. The final six-page Google PDF was rendered and every page inspected. Local source rendering used installed Microsoft Word and Poppler because LibreOffice was unavailable. QA PDFs and images remain ignored local intermediates, not additional submission outputs.
+
+## Claude Web OAuth update — 2026-10-17
+
+Vince requested Claude Web support. The actual account has no Request headers field; Anthropic documents static headers as a limited organization beta. Added optional single-owner OAuth using the installed MCP SDK's handlers, with exact Claude Web callback registration, S256 PKCE, an independent owner password, CSRF/Origin-protected consent, short-lived single-use codes, expiring access tokens, rotating refresh tokens and revocation. Existing static bearer clients still work. No third-party identity account, database or new dependency was added.
+
+The updated suite passed 31 tests with zero skipped, including an OAuth token reaching the actual MCP handler and both credential types discovering eight tools. The HTTPS check in oauth-checks.json completed discovery, DCR, password-protected consent, code exchange, a real official-client MCP listing, refresh rotation, rejected code/refresh replay and revocation. Negative tests cover wrong passwords, Origin, CSRF, redirects, resources, PKCE, client identity, code expiry, rate limits and oversized bodies. The original clean-clone and Codex session records above remain historical; no Claude conversation is claimed by this automated check.
+
+The existing Google Doc was updated in place and read back. Its security/test wording and new OAuth instructions were checked in exported PDF pages 3, 5 and 7; it now has seven pages. Original tables and earlier demonstration evidence are retained. README includes the exact enable/reconnect procedure. Synthetic Claude test files are separate under workspace/claude-test/.
+
+Runtime at this update: server and HTTPS tunnel running for Vince's immediate test. OAuth registrations and grants are bounded in process memory, so restarting requires re-adding the connector; changing the temporary hostname also requires updating the issuer. Local .env and .local/oauth-login-code.txt hold the private owner password, excluded from Git. Human Claude Web connection and actual Claude tool use remain pending. Stop the tunnel after testing.
+
+Sources: [Claude authentication](https://claude.com/docs/connectors/building/authentication), [testing through a tunnel](https://claude.com/docs/connectors/building/testing).
