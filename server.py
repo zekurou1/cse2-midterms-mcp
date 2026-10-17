@@ -14,7 +14,7 @@ from jsonschema import validate, ValidationError
 from pydantic import Field
 from starlette.responses import JSONResponse
 
-from config import AUDIT_LOG, WORKSPACE, oauth_settings, settings
+from config import AUDIT_LOG, WORKSPACE, demo_no_auth, oauth_settings, settings
 from oauth import OwnerOAuth
 from tools import Files
 from mcp.server.mcpserver.exceptions import ToolError
@@ -29,10 +29,11 @@ WRITE = ToolAnnotations(read_only_hint=False, destructive_hint=True, open_world_
 
 def create_app():
     token, _, public_host = settings()
-    oauth_config = oauth_settings()
+    demo = demo_no_auth()
+    oauth_config = None if demo else oauth_settings()
     oauth = OwnerOAuth(*oauth_config) if oauth_config else None
     oauth_app = oauth.app() if oauth else None
-    files = Files(WORKSPACE)
+    files = Files(WORKSPACE / "claude-test" if demo else WORKSPACE)
 
     async def observe(ctx, call_next):
         if ctx.method == "tools/list":
@@ -142,7 +143,7 @@ def create_app():
                 headers = dict(scope["headers"])
                 supplied = headers.get(b"authorization", b"")
                 expected = ("Bearer " + token).encode()
-                authorized = secrets.compare_digest(supplied, expected)
+                authorized = demo or secrets.compare_digest(supplied, expected)
                 if not authorized and oauth and supplied.startswith(b"Bearer "):
                     grant = await oauth.load_access_token(supplied[7:].decode("ascii", errors="ignore"))
                     authorized = bool(grant and grant.resource == oauth.resource and "files" in grant.scopes)

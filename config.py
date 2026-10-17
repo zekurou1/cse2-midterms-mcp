@@ -41,3 +41,8 @@ def oauth_settings():
     if len(password) < 32:
         raise ValueError("Set a separate OAUTH_PASSWORD of at least 32 characters.")
     return issuer, password
+
+
+def demo_no_auth():
+    """Explicit temporary testing opt-in; the server restricts it to claude-test/."""
+    return os.environ.get("MCP_DEMO_NO_AUTH", "0") == "1"

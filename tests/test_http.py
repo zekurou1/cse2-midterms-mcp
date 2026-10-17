@@ -30,7 +30,7 @@ def endpoint(tmp_path_factory):
         sock.bind(("127.0.0.1", 0))
         port = sock.getsockname()[1]
     token = secrets.token_urlsafe(32)
-    env = {**os.environ, "MCP_TOKEN": token, "MCP_PORT": str(port), "PUBLIC_HOST": "", "OAUTH_ISSUER_URL": ""}
+    env = {**os.environ, "MCP_TOKEN": token, "MCP_PORT": str(port), "PUBLIC_HOST": "", "OAUTH_ISSUER_URL": "", "MCP_DEMO_NO_AUTH": "0"}
     process = subprocess.Popen([sys.executable, "server.py"], cwd=isolated, env=env,
                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     url = f"http://127.0.0.1:{port}/mcp"

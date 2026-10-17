@@ -117,6 +117,14 @@ The tunnel configuration forwards the Host header as `127.0.0.1:8765`, preservin
 
 Wait until the generated hostname resolves and `check_endpoint.py` passes before starting agents. A newly generated hostname failed to resolve through the local resolver during the restart test even though public DNS knew it; this is recorded as a tunnel limitation. Use localhost while developing and verify the current public URL before the live demonstration.
 
+## Quick Claude Web test without sign-in
+
+For a temporary test with synthetic files only, set `MCP_DEMO_NO_AUTH=1` in ignored `.env`, then restart `cse2-mcp`. Add the current HTTPS `/mcp` URL in Claude and select **No sign-in** and **Streamable HTTP**. Enable the connector in a new chat and ask it to list available files.
+
+In this mode, all eight tools are rooted at `workspace/claude-test/`, so paths such as `notes/mcp-basics.md` are relative to that folder. OAuth is disabled. Anyone with the public URL can read and modify these test files while the tunnel is running. The main workspace, server source, secrets and logs remain outside this tool sandbox.
+
+Run `python scripts/check_demo.py https://YOUR-CURRENT-HOST.trycloudflare.com/mcp` to exercise all eight tools without credentials. Restore `MCP_DEMO_NO_AUTH=0` and restart when finished, or stop the tunnel. Authentication is enabled by default; do not use no-sign-in mode for private files or the authenticated security demonstration.
+
 ## Connect Claude Web with OAuth
 
 Claude's static request-header credentials are a limited organization beta. For an account without that feature, use the optional single-owner OAuth flow. No Google account, paid identity provider or database is needed.

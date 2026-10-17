@@ -57,3 +57,11 @@ Sources: [Claude authentication](https://claude.com/docs/connectors/building/aut
 The first human Claude Web attempt reached the owner form but returned Invalid approval origin. The consent document used Referrer-Policy: no-referrer, which causes browsers to send Origin: null on HTML form POST navigation (MDN Referrer-Policy reference). Changed only the consent GET document to same-origin; OAuth callback redirects retain no-referrer. Origin and CSRF checks remain enforced. Added response-policy regression assertions to the existing consent flow tests. All 31 tests and the real HTTPS OAuth checker passed again after restarting the server. The programmatic checker supplies Origin explicitly, so it did not expose this browser-policy interaction in the original run. A fresh human Claude connection remains required.
 
 Source: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy
+
+### Explicit no-sign-in testing mode
+
+Vince reported that the actual browser still rejected Origin after the policy correction and explicitly requested skipping authentication for testing. The browser OAuth failure remains unresolved; programmatic OAuth success is not a successful Claude Web connection.
+
+Added MCP_DEMO_NO_AUTH=1 as an explicit opt-in, default off. In this mode OAuth is disabled and all eight tools are rooted only at workspace/claude-test/. Anyone with the public URL can modify this synthetic folder while exposed. The normal workspace is not exposed by this mode. The updated suite passed 32 tests, including unauthenticated discovery/write and rejection of traversal to a file in the normal workspace. evidence/demo-no-auth-checks.json records real HTTPS calls to all eight tools without credentials, a rejected escape and deletion of the temporary check file.
+
+At handoff the opt-in is enabled locally and the existing tunnel remains running for immediate Claude testing. Select No sign-in and Streamable HTTP. Restore the flag to 0 and restart, or stop the tunnel, after testing. This mode is not the submission's authenticated security demonstration. Human Claude tool use remains pending.

@@ -1,0 +1,18 @@
+{
+  "checked_utc": "2026-10-17T08:15:35.126630+00:00",
+  "https": true,
+  "authentication_sent": false,
+  "successful_tools": [
+    "list_files",
+    "write_file",
+    "read_file",
+    "str_replace",
+    "append_file",
+    "search_files",
+    "file_info",
+    "delete_file"
+  ],
+  "parent_escape_rejected": true,
+  "temporary_file_deleted": true,
+  "claude_web_ui_test": "Pending; this check uses the official Python MCP client."
+}

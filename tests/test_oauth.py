@@ -104,6 +104,7 @@ def test_code_pkce_replay_refresh_and_revoke(oauth):
 
 def test_oauth_token_reaches_real_mcp_and_static_token_still_works(tmp_path, monkeypatch):
     import server
+    monkeypatch.setattr(server, "demo_no_auth", lambda: False)
     monkeypatch.setattr(server, "settings", lambda: ("static-secret-" + "s" * 32, 8765, ""))
     monkeypatch.setattr(server, "oauth_settings", lambda: (ISSUER, PASSWORD))
     monkeypatch.setattr(server, "WORKSPACE", tmp_path / "workspace")
@@ -120,6 +121,29 @@ def test_oauth_token_reaches_real_mcp_and_static_token_still_works(tmp_path, mon
             assert result.status_code == 200, result.text
             assert len(result.json()["result"]["tools"]) == 8
         assert client.get("/.well-known/oauth-authorization-server", headers={"Host": "evil.example"}).status_code == 400
+
+
+def test_no_auth_demo_is_confined_to_synthetic_folder(tmp_path, monkeypatch):
+    import server
+    monkeypatch.setattr(server, "settings", lambda: ("s" * 40, 8765, ""))
+    monkeypatch.setattr(server, "demo_no_auth", lambda: True)
+    monkeypatch.setattr(server, "oauth_settings", lambda: pytest.fail("OAuth must be disabled in demo mode"))
+    monkeypatch.setattr(server, "WORKSPACE", tmp_path / "workspace")
+    monkeypatch.setattr(server, "AUDIT_LOG", tmp_path / "audit.jsonl")
+    root = tmp_path / "workspace"
+    root.mkdir()
+    (root / "outside.md").write_text("Not part of the public demo", encoding="utf-8")
+    with TestClient(server.create_app(), base_url="http://127.0.0.1:8765") as client:
+        def call(method, params=None):
+            response = client.post("/mcp", json={"jsonrpc": "2.0", "id": 1, "method": method, "params": params or {}},
+                headers={"Accept": "application/json, text/event-stream", "MCP-Protocol-Version": "2025-06-18"})
+            assert response.status_code == 200
+            return response.json()["result"]
+        assert len(call("tools/list")["tools"]) == 8
+        assert not call("tools/call", {"name": "write_file", "arguments": {"path": "test.md", "content": "demo"}}).get("isError")
+        assert (root / "claude-test/test.md").read_text() == "demo"
+        assert call("tools/call", {"name": "read_file", "arguments": {"path": "../outside.md"}})["isError"]
+        assert client.get("/.well-known/oauth-authorization-server").status_code == 404
 
 
 def test_expiry_and_wrong_client(oauth):
